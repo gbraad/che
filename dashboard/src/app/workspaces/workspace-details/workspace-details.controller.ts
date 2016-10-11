@@ -329,16 +329,6 @@ export class WorkspaceDetailsController {
   }
 
   /**
-   * Creates snapshot of workspace
-   */
-  createSnapshotWorkspace() {
-    this.cheWorkspace.createSnapshot(this.workspaceId).then(() => {}, (error) => {
-      this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Creating snapshot failed.');
-      this.$log.error(error);
-    });
-  }
-
-  /**
    * Returns current status of workspace
    * @returns {String}
    */
