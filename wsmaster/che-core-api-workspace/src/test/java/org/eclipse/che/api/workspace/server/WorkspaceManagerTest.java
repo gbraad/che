@@ -56,6 +56,7 @@ import java.util.UUID;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
@@ -546,6 +547,20 @@ public class WorkspaceManagerTest {
         verify(runtimes, timeout(2000)).stop(workspace.getId());
     }
 
+    @Test
+    public void createsSnapshotBeforeWorkspaceIsStopped() throws Exception {
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
+        workspace.getAttributes().put(Constants.AUTO_CREATE_SNAPSHOT, "true");
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+
+        final RuntimeDescriptor descriptor = createDescriptor(workspace, RUNNING);
+        when(runtimes.get(any())).thenReturn(descriptor);
+
+        when(snapshotDao.replaceSnapshots(workspace.getId(),
+                                          workspace.getRuntime().getActiveEnv(),
+                                          null)).thenReturn(emptyList());
+    }
+
     @Test(expectedExceptions = ConflictException.class,
           expectedExceptionsMessageRegExp = "Could not stop the workspace " +
                                             "'.*' because its status is 'STARTING'.")
@@ -640,7 +655,9 @@ public class WorkspaceManagerTest {
         workspaceManager.stopWorkspace(workspace.getId());
 
         // then
-        verify(workspaceManager, timeout(2000)).createSnapshotSync(workspace.getRuntime(), workspace.getNamespace(), workspace.getId());
+        verify(workspaceManager, timeout(2000)).createSnapshotSync(workspace.getNamespace(),
+                                                                   workspace.getId(),
+                                                                   workspace.getRuntime().getActiveEnv());
         verify(runtimes, timeout(2000)).stop(any());
     }
 
@@ -796,9 +813,9 @@ public class WorkspaceManagerTest {
         workspaceManager.createSnapshot(workspace.getId());
 
         // then
-        verify(workspaceManager, timeout(1_000)).createSnapshotSync(any(WorkspaceRuntimeImpl.class),
-                                                                    eq(workspace.getNamespace()),
-                                                                    eq(workspace.getId()));
+        verify(workspaceManager, timeout(1_000)).createSnapshotSync(eq(workspace.getNamespace()),
+                                                                    eq(workspace.getId()),
+                                                                    anyString());
     }
 
     @Test(expectedExceptions = ConflictException.class,
@@ -958,8 +975,9 @@ public class WorkspaceManagerTest {
         }
 
         // when
-        boolean snapshotSavingStatus = workspaceManager.createSnapshotSync(
-                new WorkspaceRuntimeImpl(descriptor.getRuntime()), workspace.getNamespace(), workspace.getId());
+        boolean snapshotSavingStatus = workspaceManager.createSnapshotSync(workspace.getNamespace(),
+                                                                           workspace.getId(),
+                                                                           workspace.getRuntime().getActiveEnv());
 
         // then
         assertFalse(snapshotSavingStatus);
@@ -979,8 +997,9 @@ public class WorkspaceManagerTest {
                 .thenReturn(oldSnapshot);
 
         // when
-        boolean snapshotSavingStatus = workspaceManager.createSnapshotSync(
-                new WorkspaceRuntimeImpl(descriptor.getRuntime()), workspace.getNamespace(), workspace.getId());
+        boolean snapshotSavingStatus = workspaceManager.createSnapshotSync(workspace.getNamespace(),
+                                                                           workspace.getId(),
+                                                                           workspace.getRuntime().getActiveEnv());
 
         // then
         assertTrue(snapshotSavingStatus);
@@ -1008,8 +1027,9 @@ public class WorkspaceManagerTest {
         }
 
         // when
-        boolean snapshotSavingStatus = workspaceManager.createSnapshotSync(
-                new WorkspaceRuntimeImpl(descriptor.getRuntime()), workspace.getNamespace(), workspace.getId());
+        boolean snapshotSavingStatus = workspaceManager.createSnapshotSync(workspace.getNamespace(),
+                                                                           workspace.getId(),
+                                                                           workspace.getRuntime().getActiveEnv());
 
         // then
         assertTrue(snapshotSavingStatus);
@@ -1054,9 +1074,9 @@ public class WorkspaceManagerTest {
         workspaceManager.createSnapshot(workspace.getId());
 
         // then
-        verify(workspaceManager, timeout(1_000)).createSnapshotSync(any(WorkspaceRuntimeImpl.class),
-                                                                    eq(workspace.getNamespace()),
-                                                                    eq(workspace.getId()));
+        verify(workspaceManager, timeout(1_000)).createSnapshotSync(eq(workspace.getNamespace()),
+                                                                    eq(workspace.getId()),
+                                                                    anyString());
     }
 
     @Test
@@ -1077,9 +1097,9 @@ public class WorkspaceManagerTest {
         workspaceManager.createSnapshot(workspace.getId());
 
         // then
-        verify(workspaceManager, timeout(1_000)).createSnapshotSync(any(WorkspaceRuntimeImpl.class),
-                                                                    eq(workspace.getNamespace()),
-                                                                    eq(workspace.getId()));
+        verify(workspaceManager, timeout(1_000)).createSnapshotSync(eq(workspace.getNamespace()),
+                                                                    eq(workspace.getId()),
+                                                                    anyString());
     }
 
     @Test
@@ -1098,9 +1118,9 @@ public class WorkspaceManagerTest {
         workspaceManager.createSnapshot(workspace.getId());
 
         // then
-        verify(workspaceManager, timeout(1_000)).createSnapshotSync(any(WorkspaceRuntimeImpl.class),
-                                                                    eq(workspace.getNamespace()),
-                                                                    eq(workspace.getId()));
+        verify(workspaceManager, timeout(1_000)).createSnapshotSync(eq(workspace.getNamespace()),
+                                                                    eq(workspace.getId()),
+                                                                    anyString());
     }
 
     @Test
