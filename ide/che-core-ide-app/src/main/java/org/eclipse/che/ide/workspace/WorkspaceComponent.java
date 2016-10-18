@@ -12,7 +12,6 @@ package org.eclipse.che.ide.workspace;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.Scheduler;
-import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.workspace.Workspace;
@@ -27,11 +26,11 @@ import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
@@ -39,6 +38,7 @@ import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.part.ProcessesPart;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.websocket.MessageBus;
@@ -50,6 +50,7 @@ import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
 import java.util.List;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.parts.PartStackType.INFORMATION;
 
 /**
  * @author Evgen Vidolob
@@ -60,6 +61,7 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
 
     protected final WorkspaceServiceClient    workspaceServiceClient;
     protected final CoreLocalizationConstant  locale;
+    protected final WorkspaceAgent            workspaceAgent;
     protected final CreateWorkspacePresenter  createWorkspacePresenter;
     protected final DtoUnmarshallerFactory    dtoUnmarshallerFactory;
     protected final AppContext                appContext;
@@ -67,27 +69,28 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
     protected final DialogFactory             dialogFactory;
     protected final PreferencesManager        preferencesManager;
     protected final DtoFactory                dtoFactory;
+    protected final ProcessesPart             processesPart;
     protected final NotificationManager       notificationManager;
     protected final StartWorkspacePresenter   startWorkspacePresenter;
 
-    private final   EventBus                  eventBus;
-    private final   Provider<MachineManager>  machineManagerProvider;
-    private final   MessageBusProvider        messageBusProvider;
-    private final   WorkspaceEventsHandler    workspaceEventsHandler;
-    private final   LoaderPresenter           loader;
+    private final EventBus               eventBus;
+    private final MessageBusProvider     messageBusProvider;
+    private final WorkspaceEventsHandler workspaceEventsHandler;
+    private final LoaderPresenter        loader;
 
     protected Callback<Component, Exception> callback;
     protected boolean                        needToReloadComponents;
     private   MessageBus                     messageBus;
 
     public WorkspaceComponent(WorkspaceServiceClient workspaceServiceClient,
+                              WorkspaceAgent workspaceAgent,
                               CreateWorkspacePresenter createWorkspacePresenter,
                               StartWorkspacePresenter startWorkspacePresenter,
                               CoreLocalizationConstant locale,
                               DtoUnmarshallerFactory dtoUnmarshallerFactory,
                               EventBus eventBus,
                               AppContext appContext,
-                              Provider<MachineManager> machineManagerProvider,
+                              ProcessesPart processesPart,
                               NotificationManager notificationManager,
                               MessageBusProvider messageBusProvider,
                               BrowserQueryFieldRenderer browserQueryFieldRenderer,
@@ -97,13 +100,14 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                               WorkspaceEventsHandler workspaceEventsHandler,
                               LoaderPresenter loader) {
         this.workspaceServiceClient = workspaceServiceClient;
+        this.workspaceAgent = workspaceAgent;
         this.createWorkspacePresenter = createWorkspacePresenter;
         this.startWorkspacePresenter = startWorkspacePresenter;
         this.locale = locale;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.eventBus = eventBus;
         this.appContext = appContext;
-        this.machineManagerProvider = machineManagerProvider;
+        this.processesPart = processesPart;
         this.notificationManager = notificationManager;
         this.messageBusProvider = messageBusProvider;
         this.browserQueryFieldRenderer = browserQueryFieldRenderer;
@@ -184,6 +188,7 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
 
                 setCurrentWorkspace(workspace);
                 workspaceEventsHandler.trackWorkspaceEvents(workspace, callback);
+                workspaceAgent.openPart(processesPart, INFORMATION);
 
                 final WorkspaceStatus workspaceStatus = workspace.getStatus();
                 switch (workspaceStatus) {
@@ -196,7 +201,6 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                             public void execute() {
                                 loader.setSuccess(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME);
                                 eventBus.fireEvent(new WorkspaceStartedEvent(workspace));
-                                machineManagerProvider.get();//start instance of machine manager
                             }
                         });
                         break;

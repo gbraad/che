@@ -56,6 +56,7 @@ import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.TabI
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.header.TabHeader;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.header.TabHeaderImpl;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.ConsoleTreeContextMenuFactory;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelView;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelViewImpl;
 import org.eclipse.che.ide.extension.machine.client.targets.BaseTarget;
@@ -72,6 +73,7 @@ import org.eclipse.che.ide.extension.machine.client.targets.categories.docker.Do
 import org.eclipse.che.ide.extension.machine.client.targets.categories.ssh.SshCategoryPresenter;
 import org.eclipse.che.ide.extension.machine.client.targets.categories.ssh.SshView;
 import org.eclipse.che.ide.extension.machine.client.targets.categories.ssh.SshViewImpl;
+import org.eclipse.che.ide.part.ProcessesPart;
 
 import static org.eclipse.che.ide.extension.machine.client.perspective.OperationsPerspective.OPERATIONS_PERSPECTIVE_ID;
 
@@ -121,6 +123,7 @@ public class MachineGinModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder().build(TerminalFactory.class));
 
         bind(MachineManager.class).to(MachineManagerImpl.class).in(Singleton.class);
+        bind(ProcessesPart.class).to(ProcessesPanelPresenter.class).in(Singleton.class);
 
         bindConstant().annotatedWith(Names.named("machine.extension.api_port")).to(Constants.WS_AGENT_PORT);
 

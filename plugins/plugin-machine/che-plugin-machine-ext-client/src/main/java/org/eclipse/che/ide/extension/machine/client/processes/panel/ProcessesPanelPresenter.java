@@ -64,6 +64,7 @@ import org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode;
 import org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNodeSelectedEvent;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.ConsoleTreeContextMenu;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.ConsoleTreeContextMenuFactory;
+import org.eclipse.che.ide.part.ProcessesPart;
 import org.eclipse.che.ide.ui.loaders.DownloadWorkspaceOutputEvent;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
 import org.eclipse.che.ide.util.loging.Log;
@@ -91,7 +92,8 @@ import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTree
  * @author Artem Zatsarynnyi
  */
 @Singleton
-public class ProcessesPanelPresenter extends BasePresenter implements ProcessesPanelView.ActionDelegate,
+public class ProcessesPanelPresenter extends BasePresenter implements ProcessesPart,
+                                                                      ProcessesPanelView.ActionDelegate,
                                                                       ProcessFinishedEvent.Handler,
                                                                       OutputConsole.ActionDelegate,
                                                                       WorkspaceStartedEvent.Handler,

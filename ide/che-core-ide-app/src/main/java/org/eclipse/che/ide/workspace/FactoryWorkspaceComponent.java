@@ -12,7 +12,6 @@ package org.eclipse.che.ide.workspace;
 
 import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -30,8 +29,8 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.factory.FactoryServiceClient;
-import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.collections.Jso;
@@ -39,6 +38,7 @@ import org.eclipse.che.ide.collections.js.JsoArray;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.part.ProcessesPart;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.loging.Log;
@@ -67,6 +67,7 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
 
     @Inject
     public FactoryWorkspaceComponent(WorkspaceServiceClient workspaceServiceClient,
+                                     WorkspaceAgent workspaceAgent,
                                      CreateWorkspacePresenter createWorkspacePresenter,
                                      StartWorkspacePresenter startWorkspacePresenter,
                                      FactoryServiceClient factoryServiceClient,
@@ -74,7 +75,7 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
                                      DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                      EventBus eventBus,
                                      AppContext appContext,
-                                     Provider<MachineManager> machineManagerProvider,
+                                     ProcessesPart processesPart,
                                      NotificationManager notificationManager,
                                      MessageBusProvider messageBusProvider,
                                      BrowserQueryFieldRenderer browserQueryFieldRenderer,
@@ -84,13 +85,14 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
                                      WorkspaceEventsHandler workspaceEventsHandler,
                                      LoaderPresenter loader) {
         super(workspaceServiceClient,
+              workspaceAgent,
               createWorkspacePresenter,
               startWorkspacePresenter,
               locale,
               dtoUnmarshallerFactory,
               eventBus,
               appContext,
-              machineManagerProvider,
+              processesPart,
               notificationManager,
               messageBusProvider,
               browserQueryFieldRenderer,

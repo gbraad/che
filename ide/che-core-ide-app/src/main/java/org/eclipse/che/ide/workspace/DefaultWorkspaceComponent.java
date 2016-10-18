@@ -12,7 +12,6 @@ package org.eclipse.che.ide.workspace;
 
 import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -24,14 +23,16 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.part.ProcessesPart;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
 import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
@@ -48,13 +49,14 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent  {
 
     @Inject
     public DefaultWorkspaceComponent(WorkspaceServiceClient workspaceServiceClient,
+                                     WorkspaceAgent workspaceAgent,
                                      CreateWorkspacePresenter createWorkspacePresenter,
                                      StartWorkspacePresenter startWorkspacePresenter,
                                      CoreLocalizationConstant locale,
                                      DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                      EventBus eventBus,
                                      AppContext appContext,
-                                     Provider<MachineManager> machineManagerProvider,
+                                     ProcessesPart processesPart,
                                      NotificationManager notificationManager,
                                      MessageBusProvider messageBusProvider,
                                      BrowserQueryFieldRenderer browserQueryFieldRenderer,
@@ -64,13 +66,14 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent  {
                                      WorkspaceEventsHandler workspaceEventsHandler,
                                      LoaderPresenter loader) {
         super(workspaceServiceClient,
+              workspaceAgent,
               createWorkspacePresenter,
               startWorkspacePresenter,
               locale,
               dtoUnmarshallerFactory,
               eventBus,
               appContext,
-              machineManagerProvider,
+              processesPart,
               notificationManager,
               messageBusProvider,
               browserQueryFieldRenderer,
